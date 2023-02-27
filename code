@@ -1,0 +1,63 @@
+# import necessary libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# load the dataset
+sales_data = pd.read_csv('sales_data.csv')
+
+# data cleaning and preprocessing
+# TODO: fill missing values, remove outliers, normalize the data, etc.
+
+# exploratory data analysis (EDA)
+# compute summary statistics
+summary_stats = sales_data.describe()
+print(summary_stats)
+
+# create histograms
+sales_data.hist(figsize=(10,10))
+plt.show()
+
+# create scatter plots and box plots
+sns.pairplot(sales_data, hue='product_category')
+plt.show()
+
+# visualize sales trends over time
+sales_by_month = sales_data.groupby(pd.Grouper(key='date', freq='M'))['sales_revenue'].sum()
+sales_by_month.plot(figsize=(10,5))
+plt.show()
+
+# visualize sales by product categories
+sales_by_category = sales_data.groupby('product_category')['sales_revenue'].sum()
+sales_by_category.plot(kind='bar', figsize=(10,5))
+plt.show()
+
+# create a lag feature for the previous month's sales
+sales_data['sales_revenue_lag1'] = sales_data['sales_revenue'].shift(1)
+
+# split the data into training and testing sets
+train_data = sales_data[sales_data['date'] < '2022-01-01']
+test_data = sales_data[sales_data['date'] >= '2022-01-01']
+
+# select the features and target variables
+X_train = train_data[['sales_revenue_lag1']]
+y_train = train_data['sales_revenue']
+X_test = test_data[['sales_revenue_lag1']]
+y_test = test_data['sales_revenue']
+
+# train the linear regression model
+lr_model = LinearRegression()
+lr_model.fit(X_train, y_train)
+
+# make predictions on the testing set
+y_pred = lr_model.predict(X_test)
+
+# evaluate the performance of the model
+mae = mean_absolute_error(y_test, y_pred)
+mse = mean_squared_error(y_test, y_pred)
+rmse = np.sqrt(mse)
+print(f'MAE: {mae:.2f}, MSE: {mse:.2f}, RMSE: {rmse:.2f}')
+
+
+
